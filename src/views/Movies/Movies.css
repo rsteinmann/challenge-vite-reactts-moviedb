@@ -1,0 +1,79 @@
+.movies {
+  height: 100%;
+}
+.movies > .container {
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  max-width: 920px;
+  padding: 0 1rem;
+}
+.movies > .container > header {
+  text-align: center;
+  color: #90cea1;
+  flex-grow: 0;
+  flex-shrink: 0;
+}
+.movies > .container > footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 0.5rem 1rem;
+}
+.movies > .container > footer button {
+  padding: 0.5rem 1.5rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: 1.5rem;
+  color: #0d253f;
+  background-color: #90cea1;
+  cursor: pointer;
+  transition: background 0.15s ease-in;
+}
+.movies > .container > footer button:hover,
+.movies > .container > footer button:focus {
+  background-color: #78ab85;
+  transition: background 0.15s ease-out;
+}
+
+.movies-list {
+  flex-grow: 1;
+  max-height: 65vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+.movies-list > .inner {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 1rem;
+}
+
+.movie-item {
+  width: 12rem;
+  margin-right: 1.5rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  transition: all 0.15s ease-out;
+}
+.movie-item:hover {
+  transform: perspective(200px) translateZ(20px);
+  transition: all 0.15s ease-out;
+}
+
+.movie-item > p {
+  text-align: center;
+  margin-top: 0.5rem;
+  color: #666;
+  font-weight: 600;
+}
+
+.movie-img {
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+.movie-img > img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
