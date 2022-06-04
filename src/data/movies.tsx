@@ -1,90 +1,56 @@
 import { useCallback, useEffect, useState } from 'react'
-import { defaultOptions } from '.'
+import { fetcher } from '.'
+import useSWR from 'swr'
+import useSWRInfinite from 'swr/infinite'
 import { Genre } from './genres'
 
 export const useMovies = (genreId: number) => {
-  const [page, setPage] = useState<number>(1)
+  const getKey = useCallback(
+    (pageIndex: number, previousPageData: MoviesResponse) => {
+      // reached the end
+      if (previousPageData?.results && !previousPageData.results.length)
+        return null
+      // first page
+      if (pageIndex === 0)
+        return `/discover/movie?page=1&with_genres=${genreId}`
+      return `/discover/movie?page=${pageIndex + 1}&with_genres=${genreId}`
+    },
+    [genreId],
+  )
+  const { data, error, size, setSize } = useSWRInfinite<MoviesResponse, Error>(
+    getKey,
+    fetcher,
+  )
   const [movies, setMovies] = useState<MoviePreview[]>([])
   const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | undefined>()
 
-  const fetchNext = useCallback(async () => {
-    setLoading(true)
-    const nextPage = page + 1
-    const { results } = await fetchMovies(genreId, nextPage)
-    setMovies((prevState) => [...prevState, ...results])
-    setPage(nextPage)
-    setLoading(false)
-  }, [page])
+  const fetchNext = useCallback(() => {
+    setSize(size + 1)
+  }, [size])
 
   useEffect(() => {
-    ;(async () => {
-      try {
-        const { results } = await fetchMovies(genreId, 1)
-        setMovies(results)
-        setLoading(false)
-      } catch (error) {
-        setError('Failed to fetch movies data')
-      }
-    })()
-  }, [genreId])
+    if (data && data.length > 0) {
+      setMovies((prevState) => {
+        return [...prevState, ...data[data.length - 1].results]
+      })
+      setLoading(false)
+    }
+  }, [data])
 
   return {
-    loading,
+    loading: loading,
     error,
     movies,
     fetchNext,
   }
 }
 
-export const fetchMovies = async (genreId: number, page: number) => {
-  const res = await fetch(
-    `https://api.themoviedb.org/3/discover/movie?page=${page}&with_genres=${genreId}`,
-    defaultOptions,
-  )
-  if (res?.status === 200) {
-    const data: MoviesResponse = await res.json()
-    return data
-  } else {
-    throw new Error('failed')
-  }
-}
-
 export const useMovie = (movieId: number) => {
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | undefined>()
-  const [movie, setMovie] = useState<Movie>()
-
-  useEffect(() => {
-    console.log('trig')
-    ;(async () => {
-      try {
-        const movie = await fetchMovie(movieId)
-        setMovie(movie)
-        setLoading(false)
-      } catch (error) {
-        setError('Failed to fetch movies data')
-      }
-    })()
-  }, [movieId])
-
+  const { data, error } = useSWR<Movie, Error>(`/movie/${movieId}`, fetcher)
   return {
-    loading,
+    loading: !error && !data,
     error,
-    movie: movie,
-  }
-}
-
-export const fetchMovie = async (movieId: number) => {
-  const res = await fetch(
-    `https://api.themoviedb.org/3/movie/${movieId}`,
-    defaultOptions,
-  )
-  if (res?.status === 200) {
-    const movie: Movie = await res.json()
-    return movie
-  } else {
-    throw new Error('failed')
+    movie: data,
   }
 }
 

@@ -7,9 +7,7 @@ export const MovieDetails: React.FC = () => {
   const { movieId } = useParams()
   const { loading, error, movie } = useMovie(parseInt(movieId || '0'))
 
-  if (error) return <p className='error'>{error}</p>
-
-  console.log(movie)
+  if (error) return <p className='error'>{error.message}</p>
 
   if (loading) return <>Loading</>
   if (!movie) return <p className='error'>{error}</p>

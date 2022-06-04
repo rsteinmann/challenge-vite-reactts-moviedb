@@ -15,7 +15,7 @@ export const Movies: React.FC = () => {
     navigate(`/movie/${movieId}`)
   }, [])
 
-  if (error) return <p className='error'>{error}</p>
+  if (error) return <p className='error'>{error.message}</p>
 
   return (
     <section className='movies'>
