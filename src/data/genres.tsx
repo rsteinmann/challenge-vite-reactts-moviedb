@@ -1,40 +1,16 @@
-import { useState, useEffect } from 'react'
-import { defaultOptions } from '.'
+import { fetcher } from '.'
+import useSWR from 'swr'
 
 export const useGenres = () => {
-  const [genres, setGenres] = useState<Genre[]>([])
-  const [loading, setLoading] = useState<boolean>(true)
-  const [error, setError] = useState<string | undefined>()
-
-  useEffect(() => {
-    ;(async () => {
-      try {
-        const fetchedCategories = await fetchGenres()
-        setGenres(fetchedCategories)
-        setLoading(false)
-      } catch (error) {
-        setError('Failed to fetch movies data')
-      }
-    })()
-  }, [])
+  const { data, error } = useSWR<GenreResponse, Error>(
+    '/genre/movie/list',
+    fetcher,
+  )
 
   return {
-    loading,
+    loading: !error && !data,
     error,
-    genres,
-  }
-}
-
-export const fetchGenres = async () => {
-  const res = await fetch(
-    `https://api.themoviedb.org/3/genre/movie/list`,
-    defaultOptions,
-  )
-  if (res?.status === 200) {
-    const { genres }: GenreResponse = await res.json()
-    return genres
-  } else {
-    throw new Error('failed')
+    genres: data?.genres || [],
   }
 }
 
